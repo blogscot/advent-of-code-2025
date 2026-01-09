@@ -19,20 +19,17 @@ fn streamline(ranges: &[(u64, u64)]) -> Vec<(u64, u64)> {
             let &(start2, end2) = current;
             // if previous is a subset of current
             if start1 == start2 && end1 <= end2 {
-                let result = (start2, end2);
-                acc.push(result);
+                acc.push(*current);
                 acc
             }
             // if previous is a superset of current
             else if start1 <= start2 && end1 >= end2 {
-                let result = (start1, end1);
-                acc.push(result);
+                acc.push(previous);
                 acc
             }
             // if previous overlaps with current
             else if end1 >= start2 {
-                let result = (start1, end2);
-                acc.push(result);
+                acc.push((start1, end2));
                 acc
             } else {
                 [acc, vec![previous, *current]].concat()
