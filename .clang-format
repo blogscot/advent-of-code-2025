@@ -1,0 +1,9 @@
+---
+BasedOnStyle: Chromium
+IndentWidth: 4
+Language:        Cpp
+ColumnLimit: 100
+PointerAlignment: Left
+ReferenceAlignment: Left
+...
+

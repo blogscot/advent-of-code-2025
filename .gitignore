@@ -1,1 +1,9 @@
 Cargo.*
+target/
+
+.zig-cache/
+zig-out/
+build.zig*
+mise.toml
+
+CMakeLists.txt
