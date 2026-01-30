@@ -5,22 +5,15 @@
 #include <vector>
 
 std::tuple<size_t, size_t> find_max(const std::vector<unsigned>& digits, size_t start, size_t end) {
-    size_t index = start;
-    size_t max = digits[start];
-    for (size_t i = start; i < end; i++) {
-        if (digits[i] > max) {
-            max = digits[i];
-            index = i;
-        }
-    }
-    return {max, index};
+    auto max_it = std::max_element(digits.begin() + start, digits.begin() + end);
+    return {max_it - digits.begin(), *max_it};
 }
 
 size_t calculate_joltage(const std::vector<unsigned>& digits, int block_size) {
     size_t index{0};
     size_t joltage{0};
-    for (size_t i = 0; i < block_size; i++) {
-        auto [max, ind] = find_max(digits, index, digits.size() - (block_size - i - 1));
+    for (size_t i = 0; i < block_size; ++i) {
+        auto [ind, max] = find_max(digits, index, digits.size() - (block_size - i - 1));
         index = ind + 1;
         joltage = joltage * 10 + max;
     }
