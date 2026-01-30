@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -13,8 +14,8 @@ struct Dimensions {
     size_t width;
 };
 
-int neighbours(const std::vector<std::string>& lines, Dimensions dim, Position pos) {
-    const std::vector<Position> deltas = {
+int neighbours(std::vector<std::string> const& lines, Dimensions const& dim, Position const&& pos) {
+    static const std::vector<Position> deltas = {
         {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
     };
     int count{0};
@@ -29,7 +30,7 @@ int neighbours(const std::vector<std::string>& lines, Dimensions dim, Position p
     return count;
 }
 
-int part1(std::vector<std::string> lines, Dimensions dim) {
+int part1(std::vector<std::string>& lines, Dimensions const& dim) {
     int count{0};
     for (int i = 0; i < dim.height; i++) {
         for (int j = 0; j < dim.width; j++) {
@@ -42,7 +43,7 @@ int part1(std::vector<std::string> lines, Dimensions dim) {
     return count;
 }
 
-int update(std::vector<std::string>& lines, Dimensions dim) {
+int update(std::vector<std::string>& lines, Dimensions const& dim) {
     const std::vector<std::string> copy = lines;
     int count{0};
     for (int i = 0; i < dim.height; i++) {
@@ -59,7 +60,7 @@ int update(std::vector<std::string>& lines, Dimensions dim) {
     return count;
 }
 
-int part2(std::vector<std::string> lines, Dimensions dim) {
+int part2(std::vector<std::string>& lines, Dimensions const& dim) {
     int count = update(lines, dim);
     int prev = count;
     while (true) {
