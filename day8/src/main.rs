@@ -28,7 +28,7 @@ impl JBox {
 
     fn get_distances(&self, others: &[JBox]) -> Vec<(i64, JBox)> {
         others
-            .into_iter()
+            .iter()
             .map(|&pos| (self.distance(&pos), pos))
             .collect()
     }
@@ -57,7 +57,7 @@ impl Circuit {
     }
 }
 
-fn find_min_distances(positions: &[JBox]) -> impl Iterator<Item = Connection> {
+fn find_connections(positions: &[JBox]) -> impl Iterator<Item = Connection> {
     let mut pos = positions.to_vec();
     let mut min_distances = vec![];
     while pos.len() > 1 {
@@ -97,11 +97,10 @@ fn search_circuits(circuits: &mut Vec<Circuit>, connection: &Connection) {
 
 fn part1(positions: &[JBox], num_pairs: usize) -> usize {
     let mut circuits: Vec<Circuit> = vec![];
-    let mut connections = find_min_distances(&positions)
+    let mut connections = find_connections(positions)
         .take(num_pairs)
         .collect::<Vec<_>>();
-    while connections.len() > 0 {
-        let connection = connections.pop().unwrap();
+    while let Some(connection) = connections.pop() {
         search_circuits(&mut circuits, &connection);
     }
     let mut lengths = circuits
@@ -112,13 +111,13 @@ fn part1(positions: &[JBox], num_pairs: usize) -> usize {
     lengths.iter().take(3).product()
 }
 
-fn max_length(circuits: &Vec<Circuit>) -> Option<usize> {
+fn max_length(circuits: &[Circuit]) -> Option<usize> {
     circuits.iter().map(|c| c.jboxes.len()).max()
 }
 
 fn part2(positions: &[JBox]) -> i64 {
     let mut circuits: Vec<Circuit> = vec![];
-    let mut connections = find_min_distances(&positions);
+    let mut connections = find_connections(positions);
 
     loop {
         let connection = connections.next().unwrap();
