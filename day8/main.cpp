@@ -51,21 +51,21 @@ struct std::formatter<JBox> {
 };
 
 vector<Connection> find_connections(vector<JBox> positions) {
-    vector<Connection> min_distances{};
-    while (positions.size() > 1) {
+    vector<Connection> connections{};
+    while (!positions.empty()) {
         JBox position = positions.back();
         positions.pop_back();
 
         auto distances = position.get_distances(positions);
         ranges::for_each(distances, [&](auto&& distance) {
             auto [min_distance, min_position] = distance;
-            min_distances.push_back({min_distance, min_position, position});
+            connections.push_back({min_distance, min_position, position});
         });
     }
 
-    sort(min_distances.begin(), min_distances.end(),
+    sort(connections.begin(), connections.end(),
          [](auto&& a, auto&& b) { return std::get<0>(a) < std::get<0>(b); });
-    return min_distances;
+    return connections;
 }
 
 optional<int> get_position(vector<Circuit>& circuits, JBox jbox) {
@@ -119,7 +119,7 @@ size_t part1(vector<JBox> positions, size_t num_pairs) {
     for (auto& circuit : circuits) {
         lengths.push_back(circuit.size());
     }
-    sort(begin(lengths), end(lengths), greater<size_t>());
+    ranges::partial_sort(lengths, lengths.begin() + 3, greater<size_t>());
     auto top_three = lengths | views::take(3) | views::common;
     return ranges::fold_left(top_three, 1, [](auto acc, auto length) { return acc * length; });
 }
@@ -138,8 +138,7 @@ size_t part2(vector<JBox>& positions) {
         auto connection = connections.front();
         connections = connections.subspan(1);
         search_circuits(circuits, connection);
-        auto max{max_length(circuits)};
-        if (max == positions.size()) {
+        if (max_length(circuits) == positions.size()) {
             auto [ignore, jbox1, jbox2] = connection;
             return jbox1.x * jbox2.x;
         }
