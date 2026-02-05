@@ -63,7 +63,7 @@ size_t part2(std::string_view symbol_line, const std::vector<std::string>& lines
     size_t line_len{lines[0].size()};
 
     size_t index{0};
-    std::vector<std::vector<size_t>> matrix;
+    Matrix matrix;
     std::vector<size_t> numbers;
     for (index = 0; index < line_len; ++index) {
         std::vector<char> chars;
