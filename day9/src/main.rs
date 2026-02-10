@@ -1,14 +1,5 @@
+use itertools::Itertools;
 use std::{collections::HashSet, fmt::Debug};
-
-fn combinations(vec: &[Tile]) -> Vec<(Tile, Tile)> {
-    let mut output = vec![];
-    for i in 0..(vec.len() - 1) {
-        for j in (i + 1)..vec.len() {
-            output.push((vec[i], vec[j]));
-        }
-    }
-    output
-}
 
 fn area((a, b): (&Tile, &Tile)) -> u64 {
     (a.0.abs_diff(b.0) + 1) * (a.1.abs_diff(b.1) + 1)
@@ -69,8 +60,9 @@ impl Part2 {
     }
 
     fn solve(&self) -> u64 {
-        combinations(&self.tiles)
+        self.tiles
             .iter()
+            .tuple_combinations()
             .filter(|(t1, t2)| self.area_contains_no_edges(t1, t2))
             .map(|(t1, t2)| area((t1, t2)))
             .max()
@@ -81,8 +73,9 @@ impl Part2 {
 /// Returns all the edges that are along the given axis
 fn find_edges(tiles: &[Tile], axis: Axis) -> HashSet<Edge> {
     use Axis::*;
-    combinations(tiles)
+    tiles
         .iter()
+        .tuple_combinations()
         .filter(|(t1, t2)| match axis {
             Vertical => t1.0 == t2.0,
             Horizontal => t1.1 == t2.1,
@@ -98,8 +91,9 @@ fn find_edges(tiles: &[Tile], axis: Axis) -> HashSet<Edge> {
 }
 
 fn part1(tiles: &[Tile]) -> u64 {
-    combinations(tiles)
+    tiles
         .iter()
+        .tuple_combinations()
         .map(|(t1, t2)| area((t1, t2)))
         .max()
         .unwrap()
