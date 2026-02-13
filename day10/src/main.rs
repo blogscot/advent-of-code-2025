@@ -1,3 +1,7 @@
+#![feature(test)]
+
+extern crate test;
+
 use itertools::Itertools;
 
 #[derive(Debug, PartialEq, Clone, Eq)]
@@ -6,37 +10,41 @@ enum Light {
     Off,
 }
 
-fn parse_numbers(input: &str) -> Vec<u32> {
-    input[1..input.len() - 1]
+fn parse_numbers(input: &str) -> Vec<usize> {
+    input
+        .trim_matches(['{', '}', '(', ')'])
         .split(",")
-        .map(|s| s.parse::<u32>().unwrap())
+        .map(|s| s.parse::<usize>().unwrap())
         .collect::<Vec<_>>()
 }
 
 #[derive(Debug, PartialEq, Eq)]
 struct Lights {
-    lights: Vec<Light>,
+    state: Vec<Light>,
 }
 
 impl Lights {
     fn new(num: usize) -> Self {
-        let lights = vec![Light::Off; num];
-        Self { lights }
+        let all_off = vec![Light::Off; num];
+        Self { state: all_off }
     }
 
-    fn apply(&mut self, buttons: &[u32]) {
+    fn apply(&mut self, buttons: &[usize]) {
+        use Light::*;
         for button in buttons {
-            self.lights[*button as usize] = match self.lights[*button as usize] {
-                Light::On => Light::Off,
-                Light::Off => Light::On,
+            self.state[*button] = match self.state[*button] {
+                On => Off,
+                Off => On,
             }
         }
     }
 }
 
-fn parse_input(input: &str) -> (Vec<Light>, Vec<Vec<u32>>, Vec<u32>) {
-    let splits: Vec<_> = input.split(" ").collect();
-    let lights = &splits[0][1..splits[0].len() - 1]
+fn parse_input(input: &str) -> (Vec<Light>, Vec<Vec<usize>>, Vec<usize>) {
+    let mut splits: Vec<_> = input.split_whitespace().collect();
+    let joltage = parse_numbers(splits.pop().unwrap());
+    let lights = splits[0]
+        .trim_matches(['[', ']'])
         .chars()
         .map(|ch| match ch {
             '#' => Light::On,
@@ -45,36 +53,49 @@ fn parse_input(input: &str) -> (Vec<Light>, Vec<Vec<u32>>, Vec<u32>) {
         })
         .collect::<Vec<_>>();
 
-    let buttons: Vec<_> = splits[1..splits.len() - 1]
-        .iter()
-        .map(|s| parse_numbers(s))
-        .collect();
-
-    let joltage = parse_numbers(splits[splits.len() - 1]);
-
-    (lights.to_vec(), buttons, joltage)
-}
-
-fn count_button_presses(input: &str) -> u32 {
-    let (answer, buttons, _) = parse_input(input);
-    let mut presses = 0;
-    buttons.iter().powerset().any(|set| {
-        let mut lights = Lights::new(answer.len());
-        presses = 0;
-        set.iter().for_each(|btns| {
-            presses += 1;
-            lights.apply(btns);
-        });
-        lights.lights == answer
-    });
-    presses
+    let buttons = splits.iter().skip(1).map(|s| parse_numbers(s)).collect();
+    (lights, buttons, joltage)
 }
 
 fn part1(input: &str) -> u32 {
-    input.lines().map(count_button_presses).sum::<u32>()
+    input
+        .lines()
+        .map(|line| {
+            let mut presses = 0;
+            let (answer, buttons, _) = parse_input(line);
+            buttons.iter().powerset().any(|set| {
+                let mut lights = Lights::new(answer.len());
+                presses = 0;
+                set.iter().for_each(|btns| {
+                    presses += 1;
+                    lights.apply(btns);
+                });
+                lights.state == answer
+            });
+            presses
+        })
+        .sum::<u32>()
 }
 
 fn main() {
     let data = std::fs::read_to_string("puzzle.txt").unwrap();
     println!("{}", part1(&data));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use test::Bencher;
+
+    #[test]
+    fn test_part1() {
+        let data = std::fs::read_to_string("puzzle.txt").unwrap();
+        assert_eq!(part1(&data), 578);
+    }
+
+    #[bench]
+    fn bench_part1(b: &mut Bencher) {
+        let data = std::fs::read_to_string("puzzle.txt").unwrap();
+        b.iter(|| part1(&data));
+    }
 }
