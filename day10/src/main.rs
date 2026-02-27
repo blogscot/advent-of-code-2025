@@ -1,3 +1,4 @@
+#![allow(unused)]
 #![feature(test)]
 
 extern crate test;
@@ -64,15 +65,15 @@ impl Machine {
             .map(|i| Int::new_const(format!("p_{i}")))
             .collect();
 
-        presses.iter().for_each(|p| opt.assert(&p.ge(0)));
+        presses.iter().for_each(|p| opt.assert(&p.ge(0u32)));
 
         self.joltages.iter().enumerate().for_each(|(j, joltage)| {
-            let total: Int = self
+            let eqs = self
                 .button_group
                 .iter()
                 .enumerate()
                 .filter_map(|(b, buttons)| {
-                    if buttons.contains(&(j)) {
+                    if buttons.contains(&j) {
                         Some(&presses[b])
                     } else {
                         None
@@ -80,7 +81,7 @@ impl Machine {
                 })
                 .sum::<Int>();
 
-            opt.assert(&total.eq(Int::from_i64(*joltage as i64)));
+            opt.assert(&eqs.eq(Int::from_u64(*joltage as u64)));
         });
 
         let total = presses.iter().sum::<Int>();
